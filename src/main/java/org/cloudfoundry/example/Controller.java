@@ -16,8 +16,7 @@
 
 package org.cloudfoundry.example;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
@@ -30,6 +29,7 @@ import java.net.URI;
 
 
 @RestController
+@Slf4j
 final class Controller {
 
     static final String FORWARDED_URL = "X-CF-Forwarded-Url";
@@ -38,7 +38,9 @@ final class Controller {
 
     static final String PROXY_SIGNATURE = "X-CF-Proxy-Signature";
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final URI CANARY_URL = URI.create(System.getenv("CANARY_URL"));
+
+    private static final float CANARY_PERCENTAGE = Float.parseFloat(System.getenv("CANARY_PERCENTAGE"));
 
     private final RestOperations restOperations;
 
@@ -49,10 +51,10 @@ final class Controller {
 
     @RequestMapping(headers = {FORWARDED_URL, PROXY_METADATA, PROXY_SIGNATURE})
     ResponseEntity<?> service(RequestEntity<byte[]> incoming) {
-        this.logger.info("Incoming Request: {}", incoming);
+        log.info("Incoming Request: {}", incoming);
 
         RequestEntity<?> outgoing = getOutgoingRequest(incoming);
-        this.logger.info("Outgoing Request: {}", outgoing);
+        log.info("Outgoing Request: {}", outgoing);
 
         return this.restOperations.exchange(outgoing, byte[].class);
     }
@@ -65,8 +67,17 @@ final class Controller {
             .findFirst()
             .map(URI::create)
             .orElseThrow(() -> new IllegalStateException(String.format("No %s header present", FORWARDED_URL)));
+        log.info("Forwarding to: " + uri.toString());
+        log.info("Diverting {} of the traffic to canary. ", CANARY_PERCENTAGE);
 
-        return new RequestEntity<>(incoming.getBody(), headers, incoming.getMethod(), uri);
+        if (Math.random() < CANARY_PERCENTAGE) {
+            log.info("Diverting to canary");
+            return new RequestEntity<>(incoming.getBody(), headers, incoming.getMethod(), CANARY_URL);
+        } else {
+            log.info("Not diverting to canary");
+            return new RequestEntity<>(incoming.getBody(), headers, incoming.getMethod(), uri);
+        }
     }
+
 
 }
