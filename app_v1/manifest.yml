@@ -1,0 +1,6 @@
+---
+instances: 10
+memory: 10M
+applications:
+  - name: app_v1
+    host: app
