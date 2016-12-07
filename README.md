@@ -1,7 +1,9 @@
 # Cloud Foundry Route Service for A/B Testing
 
 This route service allows to divert a configurable percentage of traffic to the bound route. 
-This traffic will be redirected for the purpose of A/B testing, or canary releasing. 
+This traffic will be redirected for the purpose of A/B testing, or canary releasing. This image shows its usage.
+
+<img src="docs/images/A_B_RouteService.png"/>
 
 This project was forked and adapted from here: https://github.com/nebhale/route-service-example
 
