@@ -34,3 +34,7 @@ The project is released under version 2.0 of the [Apache License][a].
 [j]: http://www.jetbrains.com/idea/
 [r]: http://docs.cloudfoundry.org/services/route-services.html
 [y]: manifest.yml
+
+- https://martinfowler.com/bliki/CanaryRelease.html
+- http://static.einnovator.org/pivotal/pcf-1.6.b/pcf-dev-1.6.b.RELEASE-student-handout.pdf
+
